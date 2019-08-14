@@ -139,7 +139,7 @@ function getPlane(size) {
     var geometry = new THREE.PlaneGeometry(size, size);
     var loader = new THREE.TextureLoader();
 	var material = new THREE.MeshPhongMaterial({
-        map: loader.load('assets/textures/concrete.jpg'),
+        map: loader.load('assets/textures/checkerboard.jpg'),
 		//color: 'rgb(120, 120, 120)',
 		side: THREE.DoubleSide
 	});
