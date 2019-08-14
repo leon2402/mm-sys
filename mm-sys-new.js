@@ -81,7 +81,7 @@ function init() {
 		45,
 		window.innerWidth/window.innerHeight,
 		1,
-		5000
+		10000
 	);
 
 	var cameraZRotation = new THREE.Group();
