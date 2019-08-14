@@ -1,29 +1,46 @@
 function init() {
 	var scene = new THREE.Scene();
-    var clock = new THREE.Clock();
 	var plane = getPlane(1000);
+    var gui = new dat.GUI();
 
 	plane.name = 'plane-1';
 
     plane.rotation.x = Math.PI/2;
-
-    var sphere = getSphere(5);
-    var pointLight = getPointLight(1);
-    pointLight.position.y = 20;
-    pointLight.intensity = 2;
-    pointLight.add(sphere);
-    scene.add(pointLight);
-    
-    sphere = getSphere(5);
-    pointLight = getPointLight(1);
-    pointLight.position.y = 300;
-    pointLight.position.z = -50;
-    pointLight.position.x = 50;
-    pointLight.add(sphere);
-    
-    scene.add(pointLight);
-   
     scene.add(plane);
+
+    var sphere_1 = getSphere(5);
+    var pointLight_1 = getPointLight(1);
+    pointLight_1.position.y = 30;
+    pointLight_1.intensity = 2;
+    pointLight_1.add(sphere_1);
+    scene.add(pointLight_1);
+    
+
+    sphere_2 = getSphere(5);
+    var pointLight_2 = getPointLight(1);
+    pointLight_2.position.y = 300;
+    pointLight_2.position.z = 50;
+    pointLight_2.position.x = 0;
+    pointLight_2.add(sphere_2);
+    
+    scene.add(pointLight_2);
+
+    gui.add(pointLight_1, 'intensity', 0, 2);
+    gui.add(pointLight_1.position, 'z', -100, 100);
+
+    gui.add(pointLight_2, 'intensity', 0, 2);
+    gui.add(pointLight_2.position, 'y', 0, 1000);
+    gui.add(pointLight_2.position, 'z', -100, 100);
+    gui.add(pointLight_2.position, 'x', -1000, 1000);
+
+    var path = 'assets/cubemap/';
+    var format = '.jpg';
+    var fileNames = ['px', 'nx', 'py', 'ny', 'pz', 'nz'];
+
+    var reflectionCube = new THREE.CubeTextureLoader().load(fileNames.map(function(fileName) {
+        return path + fileName + format;
+    }));
+    scene.background = reflectionCube;
     
     var loader = new THREE.FontLoader();
     var mesh
@@ -64,7 +81,7 @@ function init() {
 		45,
 		window.innerWidth/window.innerHeight,
 		1,
-		1000
+		5000
 	);
 
 	var cameraZRotation = new THREE.Group();
@@ -88,23 +105,7 @@ function init() {
 
 	cameraXRotation.rotation.x = 0;
 	cameraYPosition.position.y = 400;
-	cameraZPosition.position.z = 700;
-
-	/*new TWEEN.Tween({val: 700})
-		.to({val: -50}, 12000)
-		.onUpdate(function() {
-			cameraZPosition.position.z = this.val;
-		})
-		.start();*/
-
-	/*new TWEEN.Tween({val: -Math.PI/2})
-		.to({val: 0}, 6000)
-		.delay(1000)
-		.easing(TWEEN.Easing.Quadratic.InOut)
-		.onUpdate(function() {
-			cameraXRotation.rotation.x = this.val;
-		})
-		.start();*/
+	cameraZPosition.position.z = -700;
 
     new TWEEN.Tween({val: 0})
 		.to({val: Math.PI*3}, 6000)
@@ -115,9 +116,8 @@ function init() {
         })
         .onComplete(function() {
             console.log('test')
-            cameraXRotation.rotation.x = 0;
-	        cameraYPosition.position.y = 400;
-	        cameraZPosition.position.z = 700;
+            camera.position.set( 10, 400, -700 );
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
         })
         .start();
         
@@ -131,7 +131,7 @@ function init() {
 
 	var controls = new THREE.OrbitControls(camera, renderer.domElement);
    
-    update(renderer, scene, camera, controls, clock);
+    update(renderer, scene, camera, controls);
     
 	return scene;
 }
@@ -168,34 +168,8 @@ function getSphere(size) {
 
 	return mesh;
 }
-function getMaterial(type, color) {
-    var selectedMaterial;
-    var materialOptions = {
-        color: color === undefined ? 'rgb(255, 255, 255)' : color,
-    };
 
-    switch (type) {
-        case 'basic':
-            selectedMaterial = new THREE.MeshBasicMaterial(materialOptions);
-            break;
-        case 'lambert':
-            selectedMaterial = new THREE.MeshLambertMaterial(materialOptions);
-            break;
-        case 'phong':
-            selectedMaterial = new THREE.MeshPhongMaterial(materialOptions);
-            break;
-        case 'standard':
-            selectedMaterial = new THREE.MeshStandardMaterial(materialOptions);
-            break;
-        default: 
-            selectedMaterial = new THREE.MeshBasicMaterial(materialOptions);
-            break;
-    }
-
-    return selectedMaterial;
-}
-
-function update(renderer, scene, camera, controls, clock) {
+function update(renderer, scene, camera, controls) {
 	renderer.render(
 		scene,
 		camera
@@ -204,11 +178,9 @@ function update(renderer, scene, camera, controls, clock) {
     controls.update();
     TWEEN.update();
 
-    var timeElapsed = clock.getElapsedTime();
-    var cameraZRotation = scene.getObjectByName('cameraZRotation');
-	cameraZRotation.rotation.z = noise.simplex2(timeElapsed * 1.5, timeElapsed * 1.5) * 0.02;
+
 	requestAnimationFrame(function() {
-		update(renderer, scene, camera, controls, clock);
+		update(renderer, scene, camera, controls);
 	})
 }
 
