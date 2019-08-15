@@ -1,3 +1,13 @@
+var pointLight_2
+var animate_light = false
+var animate_color = false
+var render
+var camera
+
+let x = 255
+let y = 0
+let z = 0
+
 function init() {
 	var scene = new THREE.Scene();
 	var plane = getPlane(1000);
@@ -17,7 +27,7 @@ function init() {
     
 
     sphere_2 = getSphere(5);
-    var pointLight_2 = getPointLight(1);
+    pointLight_2 = getPointLight(1);
     pointLight_2.position.y = 300;
     pointLight_2.position.z = 50;
     pointLight_2.position.x = 0;
@@ -32,6 +42,27 @@ function init() {
     gui.add(pointLight_2.position, 'y', 0, 1000);
     gui.add(pointLight_2.position, 'z', -100, 100);
     gui.add(pointLight_2.position, 'x', -1000, 1000);
+
+    var obj = { animateLight:function(){ 
+        if(animate_light) {
+            animate_light = false
+        } else {
+            animate_light = true
+        }
+    }};
+    gui.add(obj,'animateLight');
+
+    var obj_color = { animateLightcolor:function(){ 
+        if(animate_color) {
+            let color = new THREE.Color("rgb(255, 255, 255)");
+            pointLight_2.color = color
+            animate_color = false
+        } else {
+            animate_color = true
+        }
+
+    }};
+    gui.add(obj_color,'animateLightcolor');
 
     var path = 'assets/cubemap/';
     var format = '.jpg';
@@ -77,7 +108,7 @@ function init() {
     //console.log(logo)
     //scene.add(logo)
 
-	var camera = new THREE.PerspectiveCamera(
+	camera = new THREE.PerspectiveCamera(
 		45,
 		window.innerWidth/window.innerHeight,
 		1,
@@ -115,7 +146,7 @@ function init() {
 			cameraYRotation.rotation.y = this.val;
         })
         .onComplete(function() {
-            console.log('test')
+            //console.log('test')
             camera.position.set( 10, 400, -700 );
             camera.lookAt(new THREE.Vector3(0, 0, 0));
         })
@@ -123,7 +154,7 @@ function init() {
         
 
 
-    var renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer();
     renderer.shadowMap.enabled = true;
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	renderer.setClearColor('rgb(120, 120, 120)');
@@ -168,6 +199,11 @@ function getSphere(size) {
 
 	return mesh;
 }
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+}
 
 function update(renderer, scene, camera, controls) {
 	renderer.render(
@@ -178,11 +214,30 @@ function update(renderer, scene, camera, controls) {
     controls.update();
     TWEEN.update();
 
-
+    if(animate_light) {
+        //console.log(pointLight_2.intensity)
+        if(pointLight_2.intensity > 3) {
+            
+            pointLight_2.intensity = 0
+        } else if(pointLight_2.intensity >= 0) {
+            
+            pointLight_2.intensity += 0.01
+        }
+    }
+    
+    if(animate_color) {
+        console.log(animate_color)
+        x += 1
+        y += 1
+        z += 1
+        console.log(y)
+        let color = new THREE.Color("rgb("+x+","+y+","+z+")");
+        pointLight_2.color = color
+    }
 	requestAnimationFrame(function() {
 		update(renderer, scene, camera, controls);
 	})
 }
 
-
+window.addEventListener( 'resize', onWindowResize, false );
 var scene = init();
