@@ -4,9 +4,9 @@ var animate_color = false
 var render
 var camera
 
-let x = 255
-let y = 0
-let z = 0
+
+var random = 0;
+
 
 function init() {
 	var scene = new THREE.Scene();
@@ -226,18 +226,15 @@ function update(renderer, scene, camera, controls) {
     }
     
     if(animate_color) {
-        console.log(animate_color)
-        x += 1
-        y += 1
-        z += 1
-        console.log(y)
-        let color = new THREE.Color("rgb("+x+","+y+","+z+")");
-        pointLight_2.color = color
+        let h = random * 0.005 % 1;
+        const s = 0.5;
+        const l = 0.5;
+        pointLight_2.color.setHSL ( h, s, l );
+        random ++
     }
 	requestAnimationFrame(function() {
 		update(renderer, scene, camera, controls);
 	})
 }
-
 window.addEventListener( 'resize', onWindowResize, false );
 var scene = init();
